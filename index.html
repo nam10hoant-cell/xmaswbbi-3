@@ -1,711 +1,532 @@
-<!-- Grand Luxury Tree - Cloud Edition -->
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grand Luxury Tree - Cloud Edition</title>
-    <style>
-        /* 修改背景为深色渐变 */
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            background: radial-gradient(circle at center, #0f2027 0%, #203a43 50%, #2c5364 100%); 
-            background-color: #050d1a; 
-            font-family: 'Times New Roman', serif; 
-            touch-action: none; /* 禁止浏览器默认的缩放和平移 */
-            user-select: none;  /* 禁止选中文字 */
-            -webkit-user-select: none;
-        }
-        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; cursor: grab; }
-        #canvas-container:active { cursor: grabbing; }
-
-        .ui-hidden { opacity: 0 !important; pointer-events: none !important; }
-        #loader {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #050d1a; z-index: 100;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.8s ease-out;
-        }
-        .loader-text {
-            color: #d4af37; font-size: 14px; letter-spacing: 4px; margin-top: 20px;
-            text-transform: uppercase; font-weight: 100;
-        }
-        .spinner {
-            width: 40px; height: 40px; border: 1px solid rgba(212, 175, 55, 0.2); 
-            border-top: 1px solid #d4af37; border-radius: 50%; 
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Typography */
-        h1 { 
-            color: #fceea7; font-size: 8vw; 
-            max-size: 56px; margin: 0; font-weight: 400; 
-            letter-spacing: 6px; 
-            text-shadow: 0 0 50px rgba(252, 238, 167, 0.6); 
-            background: linear-gradient(to bottom, #fff, #eebb66);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            font-family: 'Cinzel', 'Times New Roman', serif;
-            opacity: 0.9; transition: opacity 0.5s ease;
-            text-align: center; pointer-events: none;
-        }
-        @media (min-width: 768px) { h1 { font-size: 56px; } }
-
-        /* Controls */
-        .controls-wrapper {
-            position: absolute; top: 100px; right: 20px;        
-            pointer-events: auto;
-            display: flex; flex-direction: column; align-items: flex-end;
-            gap: 10px; z-index: 20;
-            transition: opacity 0.5s ease;
-        }
-
-        .btn-group {
-            display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
-        }
-
-        .control-btn {
-            background: rgba(20, 20, 20, 0.6); 
-            border: 1px solid rgba(212, 175, 55, 0.4); 
-            color: #d4af37; padding: 10px 20px; 
-            cursor: pointer; text-transform: uppercase; 
-            letter-spacing: 2px; font-size: 10px;
-            transition: all 0.4s;
-            display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(5px); min-width: 120px;
-        }
-        
-        .control-btn.active {
-            background: rgba(212, 175, 55, 0.8); color: #000;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
-        }
-        .control-btn:hover { 
-            background: #d4af37; color: #000; 
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
-        }
-        
-        .hint-text {
-            color: rgba(212, 175, 55, 0.5); font-size: 9px;
-            letter-spacing: 1px; text-transform: uppercase;
-            text-align: right; margin-top: 5px; max-width: 200px;
-        }
-
-        input[type="file"] { display: none; }
-        /* Section: Touch & Gesture */
-        /* Mode Buttons (Bottom) - New for Touch */
-        #mode-bar {
-            position: absolute; bottom: 30px; left: 50%;
-            transform: translateX(-50%);
-            display: flex; gap: 15px;
-            z-index: 20; pointer-events: auto;
-        }
-        .mode-btn {
-            width: 50px; height: 50px; border-radius: 50%;
-            background: rgba(0,0,0,0.6);
-            border: 1px solid #d4af37;
-            color: #d4af37; font-size: 20px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.3s;
-            backdrop-filter: blur(4px);
-        }
-        .mode-btn:active { transform: scale(0.9); background: #d4af37; color: #000; }
-        
-        /* Webcam styles removed (camera features disabled) */
-
-        #debug-info {
-            position: absolute; bottom: 5px; left: 5px;
-            color: rgba(212, 175, 55, 0.6); font-size: 10px;
-            font-family: monospace; pointer-events: none; z-index: 51;
-            width: 100%; text-align: center;
-        }
-        
-        /* Message Box */
-        #msg-box {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #d4af37;
-            padding: 20px; color: #d4af37;
-            z-index: 200; text-align: center;
-            display: none; border-radius: 8px; min-width: 200px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Christmas - Final Clean</title>
     
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-            }
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000000; font-family: 'Segoe UI', sans-serif; }
+        #canvas-container { width: 100%; height: 100vh; display: block; }
+        
+        /* UI Center Vandiep */
+        #ui-layer {
+            position: absolute; bottom: 30px; width: 100%;
+            text-align: center; pointer-events: none; z-index: 100;
         }
-    </script>
+        
+        /* Guide text Vandiep */
+        .guide { 
+            color: rgba(255, 255, 255, 0.6); 
+            font-size: 13px; 
+            margin-bottom: 20px; 
+            text-shadow: 0 2px 4px black;
+        }
+
+        button {
+            pointer-events: auto; cursor: pointer;
+            background: linear-gradient(to bottom, #D32F2F, #8B0000); 
+            color: #FFF; border: 2px solid #FFD700;
+            padding: 15px 50px; border-radius: 30px; 
+            font-weight: 800; font-size: 16px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* Camera Preview Vandiep */
+        #camera-preview {
+            position: absolute; top: 15px; right: 15px;
+            width: 120px; height: 90px;
+            border: 2px solid rgba(255,0,0,0.5); 
+            transform: scaleX(-1); opacity: 0.6; border-radius: 8px;
+        }
+        
+        /* Vandiep */
+        #copyright {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 12px;
+            z-index: 100;
+            font-family: sans-serif;
+            pointer-events: none;
+            font-style: italic;
+        }
+
+        #error-log { display: none; position: absolute; top: 0; left: 0; color: red; background: rgba(0,0,0,0.8); z-index: 999; padding: 10px; }
+    </style>
 </head>
 <body>
-
-    <div id="loader">
-        <div class="spinner"></div>
-        <div class="loader-text">Loading Memories</div>
-    </div>
+    <div id="error-log"></div>
     
-    <div id="msg-box"></div>
+    <!-- UI Vandiep -->
+    <div id="ui-layer">
+        <!-- Vandiep -->
+        <div class="guide">
+            🖐 <b>Open:</b> Explode &nbsp;|&nbsp; 🫶 <b>Heart:</b> Love &nbsp;|&nbsp; ✊ <b>Fist:</b> Tree
+        </div>
+        <button id="btnStart" onclick="startSystem()">START MAGIC</button>
+    </div>
+
+    <!-- Vandiep -->
+    <div id="copyright">© by vandiep</div>
 
     <div id="canvas-container"></div>
+    <video class="input_video" style="display:none"></video>
+    <canvas id="camera-preview"></canvas>
 
-    <div id="ui-layer">
-        <h1>Merry Christmas</h1>
-        
-        <div class="controls-wrapper">
-            <div class="btn-group">
-                    <label class="control-btn">
-                        Add Audio
-                        <input type="file" id="audio-input" accept="audio/*">
-                    </label>
-                    <label class="control-btn">
-                        Add Local Files
-                        <input type="file" id="file-input" multiple accept="image/*">
-                    </label>
-                </div>
-            <div class="hint-text">Cloud Images Loaded. Add local files if needed.</div>
-        </div>
-    <!-- Section: Touch & Gesture -->
-        <!-- 触屏模式切换按钮 -->
-        <div id="mode-bar">
-            <div class="mode-btn" onclick="setMode('TREE')" title="Tree Mode">🎄</div>
-            <div class="mode-btn" onclick="setMode('SCATTER')" title="Scatter Mode">✨</div>
-            <div class="mode-btn" onclick="setMode('FOCUS_RANDOM')" title="Focus Mode">🔍</div>
-        </div>
-    </div>
+    <script>
+        // ==========================================
+        // 1. RESOURCES CONFIG Vandiep
+        // ==========================================
+        const MUSIC_URL = "./audio.mp3";
+        let bgMusic = new Audio(MUSIC_URL);
+        bgMusic.loop = true; bgMusic.volume = 1.0;
 
-    <div id="debug-info">Drag to rotate • Tap photo to view</div>
+        const loader = new THREE.TextureLoader();
+        const photoFiles = ['./image1.jpeg', './image2.jpeg', './image3.jpeg', './image4.jpeg', './image5.jpeg'];
+        const photoTextures = [];
+        photoFiles.forEach((f, i) => photoTextures[i] = loader.load(f));
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-        import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'; 
-        // No MediaPipe imports — gesture/camera removed
-
-        // --- 核心配置 ---
-        const CONFIG = {
-            colors: {
-                bg: 0x050d1a, 
-                fog: 0x050d1a,
-                champagneGold: 0xffd966, 
-                deepGreen: 0x03180a,     
-                accentRed: 0x990000,     
-            },
-            particles: {
-                count: 1500,     
-                dustCount: 2000, 
-                snowCount: 1000,
-                treeHeight: 24,  
-                treeRadius: 8    
-            },
-            camera: { z: 50 },
-            preload: {
-                // All auto-loading features disabled. Add images manually with "Add Local Files".
-                autoScanLocal: false,
-                useCloudImages: false,
-                cloudImageUrls: [],
-                scanCount: 0
-            }
-        };
-
-        const STATE = {
-            mode: 'TREE',
-            focusIndex: -1,
-            focusTarget: null,
-            rotation: { x: 0, y: 0 },
-            touch: { active: false, startX: 0, startY: 0, lastX: 0, lastY: 0 }
-        };
-
-        let scene, camera, renderer, composer;
-        let mainGroup;
-        let clock = new THREE.Clock();
-        let particleSystem = [];
-        let photoMeshGroup = new THREE.Group();
-        let caneTexture;
-        let snowSystem;
-        let raycaster = new THREE.Raycaster();
-        let mouse = new THREE.Vector2();
-        
-        const debugInfo = document.getElementById('debug-info');
-        // Background audio provided by user (select via UI). Defaults to no audio.
-        let bgAudio = null;
-
-        // Section: Interaction (touch/mouse only)
-        window.setMode = (mode) => {
-            if (mode === 'FOCUS_RANDOM') {
-                STATE.mode = 'FOCUS';
-                const photos = particleSystem.filter(p => p.type === 'PHOTO');
-                if (photos.length) STATE.focusTarget = photos[Math.floor(Math.random()*photos.length)].mesh;
-            } else {
-                STATE.mode = mode;
-                if (mode === 'TREE') STATE.focusTarget = null;
-            }
-        };
-
-        async function init() {
-            initThree();
-            setupEnvironment(); 
-            setupLights();
-            createTextures();
-            createParticles(); 
-            createDust();
-            createSnow();
-            setupPostProcessing();
-            setupEvents();
-            setupTouchAndClick(); 
-            
-            const loader = document.getElementById('loader');
-            loader.style.opacity = 0;
-            setTimeout(() => loader.remove(), 800);
-
-            animate();
-        }
-
-        // --- 触屏与点击逻辑 (Raycaster) ---
-        function setupTouchAndClick() {
-            const container = document.getElementById('canvas-container');
-            
-            container.addEventListener('pointerdown', (e) => {
-                STATE.touch.active = true;
-                STATE.touch.startX = e.clientX;
-                STATE.touch.startY = e.clientY;
-                STATE.touch.lastX = e.clientX;
-                STATE.touch.lastY = e.clientY;
-            });
-
-            window.addEventListener('pointermove', (e) => {
-                if (!STATE.touch.active) return;
-                const deltaX = e.clientX - STATE.touch.lastX;
-                const deltaY = e.clientY - STATE.touch.lastY;
-                STATE.rotation.y += deltaX * 0.005;
-                STATE.rotation.x += deltaY * 0.002;
-                STATE.rotation.x = Math.max(-0.5, Math.min(0.5, STATE.rotation.x));
-                STATE.touch.lastX = e.clientX;
-                STATE.touch.lastY = e.clientY;
-            });
-
-            window.addEventListener('pointerup', (e) => {
-                STATE.touch.active = false;
-            });
-
-            container.addEventListener('click', (e) => {
-                const moveDist = Math.hypot(e.clientX - STATE.touch.startX, e.clientY - STATE.touch.startY);
-                if (moveDist > 10) return; 
-
-                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-                raycaster.setFromCamera(mouse, camera);
-
-                const intersects = raycaster.intersectObjects(mainGroup.children, true);
-
-                let clickedPhoto = null;
-                for (let hit of intersects) {
-                    let obj = hit.object;
-                    while(obj.parent && obj.parent !== mainGroup && obj.parent !== photoMeshGroup) {
-                        obj = obj.parent;
-                    }
-                    const particle = particleSystem.find(p => p.mesh === obj && p.type === 'PHOTO');
-                    if (particle) {
-                        clickedPhoto = particle;
-                        break;
-                    }
-                }
-
-                if (clickedPhoto) {
-                    STATE.mode = 'FOCUS';
-                    STATE.focusTarget = clickedPhoto.mesh;
-                } else {
-                    if (STATE.mode === 'FOCUS') {
-                        STATE.mode = 'TREE';
-                        STATE.focusTarget = null;
-                    }
-                }
-            });
-
-            let lastTap = 0;
-            container.addEventListener('touchend', (e) => {
-                const currentTime = new Date().getTime();
-                const tapLength = currentTime - lastTap;
-                if (tapLength < 300 && tapLength > 0) {
-                    STATE.mode = (STATE.mode === 'SCATTER') ? 'TREE' : 'SCATTER';
-                    e.preventDefault();
-                }
-                lastTap = currentTime;
-                });
-            }
-            // Section: Touch & Gesture handlers
-        // --- 核心 Three.js 逻辑 ---
-        function initThree() {
-            const container = document.getElementById('canvas-container');
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(CONFIG.colors.bg);
-            scene.fog = new THREE.FogExp2(CONFIG.colors.fog, 0.015);
-
-            camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 2, CONFIG.camera.z); 
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.toneMapping = THREE.ReinhardToneMapping; 
-            renderer.toneMappingExposure = 2.2; 
-            container.appendChild(renderer.domElement);
-
-            mainGroup = new THREE.Group();
-            scene.add(mainGroup);
-        }
-
-        function setupEnvironment() {
-            const pmremGenerator = new THREE.PMREMGenerator(renderer);
-            scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
-        }
-
-        function setupLights() {
-            const ambient = new THREE.AmbientLight(0xffffff, 0.6); 
-            scene.add(ambient);
-            const innerLight = new THREE.PointLight(0xffaa00, 2, 20);
-            innerLight.position.set(0, 5, 0);
-            mainGroup.add(innerLight);
-            const spotGold = new THREE.SpotLight(0xffcc66, 1200);
-            spotGold.position.set(30, 40, 40); spotGold.angle = 0.5; spotGold.penumbra = 0.5;
-            scene.add(spotGold);
-            const spotBlue = new THREE.SpotLight(0x6688ff, 800); 
-            spotBlue.position.set(-30, 20, -30);
-            scene.add(spotBlue);
-            const fill = new THREE.DirectionalLight(0xffeebb, 0.8);
-            fill.position.set(0, 0, 50);
-            scene.add(fill);
-        }
-
-        function setupPostProcessing() {
-            const renderScene = new RenderPass(scene, camera);
-            const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-            bloomPass.threshold = 0.65; bloomPass.strength = 0.5; bloomPass.radius = 0.4;
-            composer = new EffectComposer(renderer);
-            composer.addPass(renderScene);
-            composer.addPass(bloomPass);
-        }
-
-        function createTextures() {
+        function createCustomTexture(type) {
             const canvas = document.createElement('canvas');
             canvas.width = 128; canvas.height = 128;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,128,128);
-            ctx.fillStyle = '#880000'; ctx.beginPath();
-            for(let i=-128; i<256; i+=32) {
-                ctx.moveTo(i, 0); ctx.lineTo(i+32, 128); ctx.lineTo(i+16, 128); ctx.lineTo(i-16, 0);
-            }
-            ctx.fill();
-            caneTexture = new THREE.CanvasTexture(canvas);
-            caneTexture.wrapS = THREE.RepeatWrapping; caneTexture.wrapT = THREE.RepeatWrapping;
-            caneTexture.repeat.set(3, 3);
-        }
-        // Section: Textures
-        // --- 粒子与图片系统 ---
-        function createSnow() {
-            const geometry = new THREE.BufferGeometry();
-            const vertices = []; const velocities = [];
-            const canvas = document.createElement('canvas');
-            canvas.width = 32; canvas.height = 32;
-            const context = canvas.getContext('2d');
-            context.fillStyle = 'white'; context.beginPath();
-            context.arc(16, 16, 16, 0, Math.PI * 2); context.fill();
-            const snowTexture = new THREE.CanvasTexture(canvas);
+            const cx = 64, cy = 64;
 
-            for (let i = 0; i < CONFIG.particles.snowCount; i++) {
-                vertices.push(THREE.MathUtils.randFloatSpread(100), THREE.MathUtils.randFloatSpread(60), THREE.MathUtils.randFloatSpread(60));
-                velocities.push(Math.random() * 0.2 + 0.1, Math.random() * 0.05);
+            if (type === 'gold_glow') {
+                const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, 40);
+                grd.addColorStop(0, '#FFFFFF'); 
+                grd.addColorStop(0.2, '#FFFFE0'); 
+                grd.addColorStop(0.5, '#FFD700');
+                grd.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = grd; ctx.fillRect(0,0,128,128);
+
+            } else if (type === 'red_light') {
+                const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, 50);
+                grd.addColorStop(0, '#FFAAAA'); 
+                grd.addColorStop(0.3, '#FF0000'); 
+                grd.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = grd; ctx.fillRect(0,0,128,128);
+
+            } else if (type === 'gift_red') {
+                ctx.fillStyle = '#D32F2F'; ctx.fillRect(20, 20, 88, 88);
+                ctx.fillStyle = '#FFD700'; ctx.fillRect(54, 20, 20, 88); ctx.fillRect(20, 54, 88, 20);
+                ctx.strokeStyle = "rgba(0,0,0,0.3)"; ctx.lineWidth=2; ctx.strokeRect(20,20,88,88);
             }
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-            geometry.setAttribute('userData', new THREE.Float32BufferAttribute(velocities, 2));
-            const material = new THREE.PointsMaterial({
-                color: 0xffffff, size: 0.4, map: snowTexture, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false
-            });
-            snowSystem = new THREE.Points(geometry, material);
-            scene.add(snowSystem);
+            return new THREE.CanvasTexture(canvas);
         }
 
-        function updateSnow() {
-            if (!snowSystem) return;
-            const positions = snowSystem.geometry.attributes.position.array;
-            const userData = snowSystem.geometry.attributes.userData.array;
-            for (let i = 0; i < CONFIG.particles.snowCount; i++) {
-                const fallSpeed = userData[i * 2];
-                positions[i * 3 + 1] -= fallSpeed;
-                const swaySpeed = userData[i * 2 + 1];
-                positions[i * 3] += Math.sin(clock.elapsedTime * 2 + i) * swaySpeed * 0.1;
-                if (positions[i * 3 + 1] < -30) {
-                    positions[i * 3 + 1] = 30;
-                    positions[i * 3] = THREE.MathUtils.randFloatSpread(100);
-                    positions[i * 3 + 2] = THREE.MathUtils.randFloatSpread(60);
-                }
-            }
-            snowSystem.geometry.attributes.position.needsUpdate = true;
-        }
+        const textures = {
+            gold: createCustomTexture('gold_glow'),
+            red: createCustomTexture('red_light'),
+            gift: createCustomTexture('gift_red')
+        };
 
-        class Particle {
-            constructor(mesh, type, isDust = false) {
-                this.mesh = mesh; this.type = type; this.isDust = isDust;
-                this.posTree = new THREE.Vector3(); this.posScatter = new THREE.Vector3();
-                this.baseScale = mesh.scale.x; 
-                const speedMult = (type === 'PHOTO') ? 0.3 : 2.0;
-                this.spinSpeed = new THREE.Vector3((Math.random()-0.5)*speedMult, (Math.random()-0.5)*speedMult, (Math.random()-0.5)*speedMult);
-                this.calculatePositions();
-            }
-            calculatePositions() {
-                if (this.type === 'PHOTO') {
-                    this.posTree.set(0, 0, 0); 
-                    const rScatter = 8 + Math.random()*12;
-                    const theta = Math.random() * Math.PI * 2;
-                    const phi = Math.acos(2 * Math.random() - 1);
-                    this.posScatter.set(rScatter * Math.sin(phi) * Math.cos(theta), rScatter * Math.sin(phi) * Math.sin(theta), rScatter * Math.cos(phi));
-                    return;
-                }
-                const h = CONFIG.particles.treeHeight;
-                let t = Math.pow(Math.random(), 0.8); 
-                const y = (t * h) - (h / 2);
-                let rMax = Math.max(0.5, CONFIG.particles.treeRadius * (1.0 - t));
-                const angle = t * 50 * Math.PI + Math.random() * Math.PI; 
-                const r = rMax * (0.8 + Math.random() * 0.4); 
-                this.posTree.set(Math.cos(angle) * r, y, Math.sin(angle) * r);
-                let rScatter = this.isDust ? (12 + Math.random()*20) : (8 + Math.random()*12);
-                const theta = Math.random() * Math.PI * 2;
-                const phi = Math.acos(2 * Math.random() - 1);
-                this.posScatter.set(rScatter * Math.sin(phi) * Math.cos(theta), rScatter * Math.sin(phi) * Math.sin(theta), rScatter * Math.cos(phi));
-            }
-            update(dt, mode, focusTargetMesh) {
-                let target = (mode === 'SCATTER') ? this.posScatter : this.posTree;
-                if (mode === 'FOCUS') {
-                    if (this.mesh === focusTargetMesh) {
-                        const desiredWorldPos = new THREE.Vector3(0, 2, 35);
-                        const invMatrix = new THREE.Matrix4().copy(mainGroup.matrixWorld).invert();
-                        target = desiredWorldPos.applyMatrix4(invMatrix);
-                    } else target = this.posScatter;
-                }
-                const lerpSpeed = (mode === 'FOCUS' && this.mesh === focusTargetMesh) ? 5.0 : 2.0; 
-                this.mesh.position.lerp(target, lerpSpeed * dt);
-                // Section: Particle update
-                if (mode === 'SCATTER') {
-                    this.mesh.rotation.x += this.spinSpeed.x * dt;
-                    this.mesh.rotation.y += this.spinSpeed.y * dt;
-                    this.mesh.rotation.z += this.spinSpeed.z * dt; 
-                } else if (mode === 'TREE') {
-                    if (this.type === 'PHOTO') {
-                        this.mesh.lookAt(0, this.mesh.position.y, 0);
-                        this.mesh.rotateY(Math.PI);
-                    } else {
-                        this.mesh.rotation.x = THREE.MathUtils.lerp(this.mesh.rotation.x, 0, dt);
-                        this.mesh.rotation.z = THREE.MathUtils.lerp(this.mesh.rotation.z, 0, dt);
-                        this.mesh.rotation.y += 0.5 * dt; 
-                    }
-                }
-                if (mode === 'FOCUS' && this.mesh === focusTargetMesh) this.mesh.lookAt(camera.position); 
+        // ==========================================
+        // 2. SYSTEM CONFIG Vandiep
+        // ==========================================
+        const CONFIG = {
+            goldCount: 2000,
+            redCount: 300,
+            giftCount: 150,
+            explodeRadius: 65,  
+            photoOrbitRadius: 25,
+            treeHeight: 70,
+            treeBaseRadius: 35
+        };
 
-                let s = this.baseScale;
-                if (this.isDust) {
-                    s = this.baseScale * (0.8 + 0.4 * Math.sin(clock.elapsedTime * 4 + this.mesh.id));
-                    if (mode === 'TREE') s = 0; 
-                } else if (mode === 'SCATTER' && this.type === 'PHOTO') s = this.baseScale * 2.5; 
-                else if (mode === 'FOCUS') {
-                    if (this.mesh === focusTargetMesh) s = 4.5; else s = this.baseScale * 0.8; 
-                }
-                this.mesh.scale.lerp(new THREE.Vector3(s,s,s), 4*dt);
-            }
-        }
-
-        function updatePhotoLayout() {
-            const photos = particleSystem.filter(p => p.type === 'PHOTO');
-            const count = photos.length;
-            if (count === 0) return;
-            const h = CONFIG.particles.treeHeight * 0.9;
-            const bottomY = -h/2; const stepY = h / count; const loops = 3;
-            photos.forEach((p, i) => {
-                const y = bottomY + stepY * i + stepY/2;
-                const normalizedH = (y + h/2) / CONFIG.particles.treeHeight; 
-                const r = Math.max(1.0, CONFIG.particles.treeRadius * (1.0 - normalizedH)) + 3.0; 
-                const angle = normalizedH * Math.PI * 2 * loops + (Math.PI/4); 
-                p.posTree.set(Math.cos(angle) * r, y, Math.sin(angle) * r);
-            });
-        }
-
-        function createParticles() {
-            const sphereGeo = new THREE.SphereGeometry(0.5, 32, 32); 
-            const boxGeo = new THREE.BoxGeometry(0.55, 0.55, 0.55); 
-            const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(0, -0.5, 0), new THREE.Vector3(0, 0.3, 0), new THREE.Vector3(0.1, 0.5, 0), new THREE.Vector3(0.3, 0.4, 0)]);
-            const candyGeo = new THREE.TubeGeometry(curve, 16, 0.08, 8, false);
-            const goldMat = new THREE.MeshStandardMaterial({ color: CONFIG.colors.champagneGold, metalness: 1.0, roughness: 0.1, envMapIntensity: 2.0, emissive: 0x443300, emissiveIntensity: 0.3 });
-            const greenMat = new THREE.MeshStandardMaterial({ color: CONFIG.colors.deepGreen, metalness: 0.2, roughness: 0.8, emissive: 0x002200, emissiveIntensity: 0.2 });
-            const redMat = new THREE.MeshPhysicalMaterial({ color: CONFIG.colors.accentRed, metalness: 0.3, roughness: 0.2, clearcoat: 1.0, emissive: 0x330000 });
-            const candyMat = new THREE.MeshStandardMaterial({ map: caneTexture, roughness: 0.4 });
-            // Section: Particle materials
-            for (let i = 0; i < CONFIG.particles.count; i++) {
-                const rand = Math.random();
-                let mesh, type;
-                if (rand < 0.40) { mesh = new THREE.Mesh(boxGeo, greenMat); type = 'BOX'; }
-                else if (rand < 0.70) { mesh = new THREE.Mesh(boxGeo, goldMat); type = 'GOLD_BOX'; }
-                else if (rand < 0.92) { mesh = new THREE.Mesh(sphereGeo, goldMat); type = 'GOLD_SPHERE'; }
-                else if (rand < 0.97) { mesh = new THREE.Mesh(sphereGeo, redMat); type = 'RED'; }
-                else { mesh = new THREE.Mesh(candyGeo, candyMat); type = 'CANE'; }
-                const s = 0.4 + Math.random() * 0.5;
-                mesh.scale.set(s,s,s); mesh.rotation.set(Math.random()*6, Math.random()*6, Math.random()*6);
-                mainGroup.add(mesh);
-                particleSystem.push(new Particle(mesh, type, false));
-            }
-            // Star
-            const starShape = new THREE.Shape();
-            const points = 5;
-            for (let i = 0; i < points * 2; i++) {
-                const angle = (i * Math.PI) / points + Math.PI / 2;
-                const r = (i % 2 === 0) ? 1.5 : 0.7;
-                const x = Math.cos(angle) * r; const y = Math.sin(angle) * r;
-                if (i === 0) starShape.moveTo(x, y); else starShape.lineTo(x, y);
-            }
-            starShape.closePath();
-            const starGeo = new THREE.ExtrudeGeometry(starShape, { depth: 0.4, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.1, bevelSegments: 2 });
-            starGeo.center(); 
-            const starMat = new THREE.MeshStandardMaterial({ color: 0xffdd88, emissive: 0xffaa00, emissiveIntensity: 1.0, metalness: 1.0, roughness: 0 });
-            const star = new THREE.Mesh(starGeo, starMat);
-            star.position.set(0, CONFIG.particles.treeHeight/2 + 1.2, 0);
-            mainGroup.add(star);
-            mainGroup.add(photoMeshGroup);
-        }
-
-        function createDust() {
-            const geo = new THREE.TetrahedronGeometry(0.08, 0);
-            const mat = new THREE.MeshBasicMaterial({ color: 0xffeebb, transparent: true, opacity: 0.8 });
-            for(let i=0; i<CONFIG.particles.dustCount; i++) {
-                 const mesh = new THREE.Mesh(geo, mat);
-                 mesh.scale.setScalar(0.5 + Math.random());
-                 mainGroup.add(mesh);
-                 particleSystem.push(new Particle(mesh, 'DUST', true));
-            }
-        }
-
-        function addPhotoToScene(texture) {
-            const frameGeo = new THREE.BoxGeometry(1.4, 1.4, 0.05);
-            const frameMat = new THREE.MeshStandardMaterial({ color: CONFIG.colors.champagneGold, metalness: 1.0, roughness: 0.1 });
-            const frame = new THREE.Mesh(frameGeo, frameMat);
-            let width = 1.2; let height = 1.2;
-            if (texture.image) {
-                const aspect = texture.image.width / texture.image.height;
-                if (aspect > 1) height = width / aspect; else width = height * aspect;
-            }
-            const photoGeo = new THREE.PlaneGeometry(width, height);
-            const photoMat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-            const photo = new THREE.Mesh(photoGeo, photoMat);
-            photo.position.z = 0.04;
-            const group = new THREE.Group();
-            group.add(frame); group.add(photo);
-            frame.scale.set(width/1.2, height/1.2, 1);
-            const s = 0.8; group.scale.set(s,s,s);
-            photoMeshGroup.add(group);
-            particleSystem.push(new Particle(group, 'PHOTO', false));
-            updatePhotoLayout();
-        }
-        // Section: Image & Audio handlers
-        function handleImageUpload(e) {
-            const files = e.target.files;
-            if(!files.length) return;
-            Array.from(files).forEach(f => {
-                if (!f.type.startsWith('image/')) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    new THREE.TextureLoader().load(ev.target.result, (t) => {
-                        t.colorSpace = THREE.SRGBColorSpace;
-                        addPhotoToScene(t);
-                    });
-                }
-                reader.readAsDataURL(f);
-            });
-        }
-
-        function handleAudioUpload(e) {
-            const files = e.target.files;
-            if(!files || files.length === 0) return;
-            const f = files[0];
-            if (!f.type.startsWith('audio/')) return;
-            // Revoke previous audio URL if any
-            try { if (bgAudio && bgAudio.src && bgAudio._objectURL) { URL.revokeObjectURL(bgAudio._objectURL); } } catch(e) {}
-            const url = URL.createObjectURL(f);
-            if (bgAudio) {
-                bgAudio.pause();
-                bgAudio.src = url;
-            } else {
-                bgAudio = new Audio(url);
-                bgAudio.loop = true;
-                bgAudio.volume = 0.8;
-            }
-            bgAudio._objectURL = url;
-            bgAudio.play().catch(err => { console.warn('Audio play prevented:', err); });
-            showMsg('Audio loaded — you can replace it anytime');
-        }
+        let scene, camera, renderer;
+        let groupGold, groupRed, groupGift; 
+        let photoMeshes = [];    
+        let titleMesh, starMesh, loveMesh;
         
-        function loadPredefinedImages() {
-            // Auto-loading disabled. Add images using the "Add Local Files" button.
-            return;
+        let state = 'TREE'; 
+        let selectedIndex = 0;
+        let handX = 0.5;
+
+        // ==========================================
+        // 3. THREE.JS SYSTEM Vandiep
+        // ==========================================
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.002);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+            camera.position.z = 100;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            groupGold = createParticleSystem('gold', CONFIG.goldCount, 2.0);
+            groupRed = createParticleSystem('red', CONFIG.redCount, 3.5); 
+            groupGift = createParticleSystem('gift', CONFIG.giftCount, 3.0); 
+
+            createPhotos();
+            createDecorations();
+            animate();
         }
 
-        // Media / gesture functions removed
-        function showMsg(txt) {
-            const box = document.getElementById('msg-box');
-            box.innerText = txt; box.style.display = 'block';
-            setTimeout(() => { box.style.display = 'none'; }, 3000);
+        function createParticleSystem(type, count, size) {
+            const pPositions = [];
+            const pExplodeTargets = [];
+            const pTreeTargets = [];
+            const pHeartTargets = [];
+            const sizes = []; 
+            const phases = []; 
+            
+            for(let i=0; i<count; i++) {
+                // --- TREE Vandiep ---
+                const h = Math.random() * CONFIG.treeHeight; 
+                const y = h - CONFIG.treeHeight / 2;
+                let radiusRatio = (type === 'gold') ? Math.sqrt(Math.random()) : 0.9 + Math.random()*0.1;
+                const maxR = (1 - (h / CONFIG.treeHeight)) * CONFIG.treeBaseRadius;
+                const r = maxR * radiusRatio; 
+                const theta = Math.random() * Math.PI * 2;
+                pTreeTargets.push(r * Math.cos(theta), y, r * Math.sin(theta));
+
+                // --- EXPLODE Vandiep ---
+                const u = Math.random();
+                const v = Math.random();
+                const phi = Math.acos(2 * v - 1);
+                const lam = 2 * Math.PI * u;
+                let radMult = (type === 'gift') ? 1.2 : 1.0;
+                const rad = CONFIG.explodeRadius * Math.cbrt(Math.random()) * radMult;
+                pExplodeTargets.push(rad * Math.sin(phi) * Math.cos(lam), rad * Math.sin(phi) * Math.sin(lam), rad * Math.cos(phi));
+
+                // --- SOFT HEART Vandiep ---
+                const tHeart = Math.random() * Math.PI * 2;
+                let hx = 16 * Math.pow(Math.sin(tHeart), 3);
+                let hy = 13 * Math.cos(tHeart) - 5 * Math.cos(2*tHeart) - 2 * Math.cos(3*tHeart) - Math.cos(4*tHeart);
+                
+                const rFill = Math.pow(Math.random(), 0.3); // Soft fill Vandiep
+                hx *= rFill; hy *= rFill;
+                let hz = (Math.random() - 0.5) * 8 * rFill; 
+                
+                const noise = 1.0;
+                hx += (Math.random() - 0.5) * noise;
+                hy += (Math.random() - 0.5) * noise;
+                hz += (Math.random() - 0.5) * noise;
+
+                const scaleH = 2.2;
+                pHeartTargets.push(hx * scaleH, hy * scaleH + 5, hz); 
+
+                // --- INIT Vandiep ---
+                pPositions.push(pTreeTargets[i*3], pTreeTargets[i*3+1], pTreeTargets[i*3+2]);
+                sizes.push(size);
+                phases.push(Math.random() * Math.PI * 2);
+            }
+
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(pPositions, 3));
+            geo.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+            
+            // Init colors Vandiep
+            const colors = new Float32Array(count * 3);
+            const baseColor = new THREE.Color();
+            if(type === 'gold') baseColor.setHex(0xFFD700);
+            else if(type === 'red') baseColor.setHex(0xFF0000);
+            else baseColor.setHex(0xFFFFFF);
+
+            for(let i=0; i<count; i++) {
+                colors[i*3] = baseColor.r;
+                colors[i*3+1] = baseColor.g;
+                colors[i*3+2] = baseColor.b;
+            }
+            geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            geo.userData = { 
+                tree: pTreeTargets, explode: pExplodeTargets, heart: pHeartTargets, 
+                phases: phases, baseColor: baseColor, baseSize: size
+            };
+
+            const mat = new THREE.PointsMaterial({
+                size: size,
+                map: textures[type],
+                transparent: true, opacity: 1.0,
+                vertexColors: true, 
+                blending: (type === 'gift') ? THREE.NormalBlending : THREE.AdditiveBlending, 
+                depthWrite: false,
+                sizeAttenuation: true
+            });
+
+            const points = new THREE.Points(geo, mat);
+            scene.add(points);
+            return points;
         }
-        // Gesture/camera features removed — interaction is touch/mouse only
-        function setupEvents() {
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                composer.setSize(window.innerWidth, window.innerHeight);
-            });
-            document.getElementById('file-input').addEventListener('change', handleImageUpload);
-            const audioEl = document.getElementById('audio-input');
-            if (audioEl) audioEl.addEventListener('change', handleAudioUpload);
-            window.addEventListener('keydown', (e) => {
-                if (e.key.toLowerCase() === 'h') {
-                    const controls = document.querySelector('.controls-wrapper');
-                    if (controls) controls.classList.toggle('ui-hidden');
+
+        function createPhotos() {
+            const geo = new THREE.PlaneGeometry(8, 8);
+            const borderGeo = new THREE.PlaneGeometry(9, 9); 
+            const borderMat = new THREE.MeshBasicMaterial({ color: 0xFFD700 }); 
+
+            for(let i=0; i<5; i++) {
+                const mat = new THREE.MeshBasicMaterial({ map: photoTextures[i], side: THREE.DoubleSide });
+                const mesh = new THREE.Mesh(geo, mat);
+                const border = new THREE.Mesh(borderGeo, borderMat);
+                border.position.z = -0.1; 
+                mesh.add(border);
+                mesh.visible = false; mesh.scale.set(0,0,0);
+                scene.add(mesh);
+                photoMeshes.push(mesh);
+            }
+        }
+
+        function createDecorations() {
+            // MERRY CHRISTMAS Vandiep
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024; canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.font = 'bold italic 90px "Times New Roman"';
+            ctx.fillStyle = '#FFD700'; ctx.textAlign = 'center';
+            ctx.shadowColor = "#FF0000"; ctx.shadowBlur = 40; 
+            ctx.fillText("MERRY CHRISTMAS", 512, 130);
+            const tex = new THREE.CanvasTexture(canvas);
+            const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, blending: THREE.AdditiveBlending });
+            titleMesh = new THREE.Mesh(new THREE.PlaneGeometry(60, 15), mat);
+            titleMesh.position.set(0, 50, 0);
+            scene.add(titleMesh);
+
+            // STAR Vandiep
+            const starCanvas = document.createElement('canvas');
+            starCanvas.width = 128; starCanvas.height = 128;
+            const sCtx = starCanvas.getContext('2d');
+            sCtx.fillStyle = "#FFFF00"; sCtx.shadowColor="#FFF"; sCtx.shadowBlur=20;
+            sCtx.beginPath();
+            const cx=64, cy=64, outer=50, inner=20;
+            for(let i=0; i<5; i++){
+                sCtx.lineTo(cx + Math.cos((18+i*72)/180*Math.PI)*outer, cy - Math.sin((18+i*72)/180*Math.PI)*outer);
+                sCtx.lineTo(cx + Math.cos((54+i*72)/180*Math.PI)*inner, cy - Math.sin((54+i*72)/180*Math.PI)*inner);
+            }
+            sCtx.closePath(); sCtx.fill();
+            const starTex = new THREE.CanvasTexture(starCanvas);
+            const starMat = new THREE.MeshBasicMaterial({ map: starTex, transparent: true, blending: THREE.AdditiveBlending });
+            starMesh = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), starMat);
+            starMesh.position.set(0, CONFIG.treeHeight/2 + 2, 0);
+            scene.add(starMesh);
+
+            // I LOVE YOU TEXT Vandiep
+            const loveCanvas = document.createElement('canvas');
+            loveCanvas.width = 1024; loveCanvas.height = 256;
+            const lCtx = loveCanvas.getContext('2d');
+            lCtx.font = 'bold 120px "Segoe UI", sans-serif';
+            lCtx.fillStyle = '#FF69B4'; lCtx.textAlign = 'center';
+            lCtx.shadowColor = "#FF1493"; lCtx.shadowBlur = 40; 
+            lCtx.fillText("I LOVE YOU ❤️", 512, 130);
+            const loveTex = new THREE.CanvasTexture(loveCanvas);
+            const loveMat = new THREE.MeshBasicMaterial({ map: loveTex, transparent: true, blending: THREE.AdditiveBlending });
+            loveMesh = new THREE.Mesh(new THREE.PlaneGeometry(70, 18), loveMat);
+            loveMesh.position.set(0, 0, 20);
+            loveMesh.visible = false;
+            scene.add(loveMesh);
+        }
+
+        function updateParticleGroup(group, type, targetState, speed, handRotY, time) {
+            const positions = group.geometry.attributes.position.array;
+            const sizes = group.geometry.attributes.size.array;
+            const colors = group.geometry.attributes.color.array;
+            const phases = group.geometry.userData.phases;
+            const baseColor = group.geometry.userData.baseColor;
+            const baseSize = group.geometry.userData.baseSize;
+            
+            const targetKey = (targetState === 'TREE') ? 'tree' : (targetState === 'HEART' ? 'heart' : 'explode');
+            const targets = group.geometry.userData[(targetState === 'PHOTO') ? 'explode' : targetKey];
+
+            // 1. Vandiep
+            for(let i=0; i<positions.length; i++) {
+                positions[i] += (targets[i] - positions[i]) * speed;
+            }
+            group.geometry.attributes.position.needsUpdate = true;
+            
+            // 2. COLOR & SIZE Vandiep
+            const count = positions.length / 3;
+            
+            if (targetState === 'TREE') {
+                group.rotation.y += 0.003;
+                
+                for(let i=0; i<count; i++) {
+                    sizes[i] = baseSize;
+                    let brightness = 1.0;
+                    if(type === 'red') {
+                        // RED
+                        brightness = 0.5 + 0.5 * Math.sin(time * 3 + phases[i]);
+                    } else if(type === 'gold') {
+                        // YELLOW
+                        brightness = 0.8 + 0.4 * Math.sin(time * 10 + phases[i]);
+                    }
+                    colors[i*3]   = baseColor.r * brightness;
+                    colors[i*3+1] = baseColor.g * brightness;
+                    colors[i*3+2] = baseColor.b * brightness;
                 }
-            });
+                group.geometry.attributes.color.needsUpdate = true;
+                group.geometry.attributes.size.needsUpdate = true;
+
+            } else if (targetState === 'HEART') {
+                group.rotation.y = 0;
+                const beatScale = 1 + Math.abs(Math.sin(time * 3)) * 0.15;
+                group.scale.set(beatScale, beatScale, beatScale);
+
+                // Vandiep
+                for(let i=0; i<count; i++) {
+                    colors[i*3] = baseColor.r; colors[i*3+1] = baseColor.g; colors[i*3+2] = baseColor.b;
+                    if (i % 3 === 0) sizes[i] = baseSize;
+                    else sizes[i] = 0;
+                }
+                group.geometry.attributes.color.needsUpdate = true;
+                group.geometry.attributes.size.needsUpdate = true;
+
+            } else {
+                // EXPLODE
+                group.scale.set(1,1,1);
+                group.rotation.y += (handRotY - group.rotation.y) * 0.1;
+
+                // size, color
+                for(let i=0; i<count; i++) {
+                    sizes[i] = baseSize;
+                    let brightness = 1.0;
+                    if(type === 'gold' || type === 'red') {
+                        brightness = 0.8 + 0.5 * Math.sin(time * 12 + phases[i]);
+                    }
+                    colors[i*3]   = baseColor.r * brightness;
+                    colors[i*3+1] = baseColor.g * brightness;
+                    colors[i*3+2] = baseColor.b * brightness;
+                }
+                group.geometry.attributes.size.needsUpdate = true;
+                group.geometry.attributes.color.needsUpdate = true;
+            }
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            const dt = clock.getDelta();
+            const time = Date.now() * 0.001;
+            const speed = 0.08;
+            const handRotY = (handX - 0.5) * 4.0;
 
-            // Interaction: touch/mouse only
-            if (STATE.touch.active) {
-                // touch drag already updates STATE.rotation in event handlers
-            } else {
-                // Auto idle rotation
-                if (STATE.mode === 'TREE') {
-                    STATE.rotation.y += 0.3 * dt;
-                    STATE.rotation.x += (0 - STATE.rotation.x) * 2.0 * dt;
-                } else {
-                    STATE.rotation.y += 0.1 * dt;
+            updateParticleGroup(groupGold, 'gold', state, speed, handRotY, time);
+            updateParticleGroup(groupRed, 'red', state, speed, handRotY, time);
+            updateParticleGroup(groupGift, 'gift', state, speed, handRotY, time);
+
+            photoMeshes.forEach((mesh, i) => {
+                if(!mesh.material.map && photoTextures[i]) {
+                    mesh.material.map = photoTextures[i]; mesh.material.needsUpdate = true;
                 }
-            }
-            // Section: Animation & render
-            mainGroup.rotation.y = STATE.rotation.y;
-            mainGroup.rotation.x = STATE.rotation.x;
+            });
 
-            particleSystem.forEach(p => p.update(dt, STATE.mode, STATE.focusTarget));
-            updateSnow();
-            composer.render();
+            if (state === 'TREE') {
+                titleMesh.visible = true; starMesh.visible = true; loveMesh.visible = false;
+                titleMesh.scale.lerp(new THREE.Vector3(1,1,1), 0.1);
+                starMesh.rotation.z -= 0.02; 
+                starMesh.material.opacity = 0.7 + 0.3*Math.sin(time*5);
+                photoMeshes.forEach(m => { m.scale.lerp(new THREE.Vector3(0,0,0), 0.1); m.visible = false; });
+
+            } else if (state === 'HEART') {
+                titleMesh.visible = false; starMesh.visible = false; loveMesh.visible = true;
+                photoMeshes.forEach(m => { m.visible = false; });
+                const s = 1 + Math.abs(Math.sin(time*3))*0.1;
+                loveMesh.scale.set(s,s,1);
+
+            } else if (state === 'EXPLODE') {
+                titleMesh.visible = false; starMesh.visible = false; loveMesh.visible = false;
+                const baseAngle = groupGold.rotation.y; 
+                const angleStep = (Math.PI * 2) / 5;
+                let bestIdx = 0; let maxZ = -999;
+                photoMeshes.forEach((mesh, i) => {
+                    mesh.visible = true;
+                    const angle = baseAngle + i * angleStep;
+                    const x = Math.sin(angle) * CONFIG.photoOrbitRadius;
+                    const z = Math.cos(angle) * CONFIG.photoOrbitRadius;
+                    const y = Math.sin(time + i) * 3; 
+                    mesh.position.lerp(new THREE.Vector3(x, y, z), 0.1);
+                    mesh.lookAt(camera.position);
+                    if (z > maxZ) { maxZ = z; bestIdx = i; }
+                    if (z > 5) { 
+                        const ds = 1.0 + (z/CONFIG.photoOrbitRadius)*0.8; 
+                        mesh.scale.lerp(new THREE.Vector3(ds, ds, ds), 0.1);
+                    } else {
+                        mesh.scale.lerp(new THREE.Vector3(0.6, 0.6, 0.6), 0.1);
+                    }
+                });
+                selectedIndex = bestIdx;
+
+            } else if (state === 'PHOTO') {
+                loveMesh.visible = false;
+                photoMeshes.forEach((mesh, i) => {
+                    if (i === selectedIndex) {
+                        mesh.position.lerp(new THREE.Vector3(0, 0, 60), 0.1);
+                        mesh.scale.lerp(new THREE.Vector3(5, 5, 5), 0.1);
+                        mesh.lookAt(camera.position); mesh.rotation.z = 0;
+                    } else {
+                        mesh.scale.lerp(new THREE.Vector3(0,0,0), 0.1);
+                    }
+                });
+            }
+            renderer.render(scene, camera);
         }
-        // Section: Event bindings
-        init();
+
+        function startSystem() {
+            document.getElementById('btnStart').style.display = 'none';
+            bgMusic.play().catch(e => console.log(e));
+            init3D();
+
+            const video = document.getElementsByClassName('input_video')[0];
+            const canvas = document.getElementById('camera-preview');
+            const ctx = canvas.getContext('2d');
+            
+            const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+            hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+
+            hands.onResults(results => {
+                ctx.clearRect(0,0,100,75); ctx.drawImage(results.image, 0, 0, 100, 75);
+
+                // --- Hand Logic  ---
+                if (results.multiHandLandmarks.length === 2) {
+                    const h1 = results.multiHandLandmarks[0]; const h2 = results.multiHandLandmarks[1];
+                    const distIndex = Math.hypot(h1[8].x - h2[8].x, h1[8].y - h2[8].y);
+                    const distThumb = Math.hypot(h1[4].x - h2[4].x, h1[4].y - h2[4].y);
+                    if (distIndex < 0.15 && distThumb < 0.15) {
+                        state = 'HEART'; return;
+                    }
+                }
+
+                if(results.multiHandLandmarks.length > 0) {
+                    const lm = results.multiHandLandmarks[0];
+                    handX = lm[9].x; 
+                    const tips = [8,12,16,20]; const wrist = lm[0];
+                    let openDist = 0; tips.forEach(i => openDist += Math.hypot(lm[i].x-wrist.x, lm[i].y-wrist.y));
+                    const avgDist = openDist / 4;
+                    const pinchDist = Math.hypot(lm[4].x-lm[8].x, lm[4].y-lm[8].y);
+
+                    if (avgDist < 0.25) { 
+                        state = 'TREE'; 
+                    } else if (pinchDist < 0.05) {
+                        state = 'PHOTO'; 
+                    } else {
+                        state = 'EXPLODE'; 
+                    }
+                } else {
+                    state = 'TREE'; 
+                }
+            });
+
+            const cameraUtils = new Camera(video, {
+                onFrame: async () => { await hands.send({image: video}); }, width: 320, height: 240
+            });
+            cameraUtils.start();
+        }
+
+        window.addEventListener('resize', () => {
+            if(camera) { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
+        });
     </script>
 </body>
-
 </html>
